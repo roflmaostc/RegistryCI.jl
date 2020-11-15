@@ -1,16 +1,16 @@
-name: TagBot Triggers
+name: TagBot
 on:
-  schedule:
-    - cron: 0 0 * * *
-  pull_request:
+  issue_comment:  # THIS BIT IS NEW
     types:
-      - closed
+      - created
+  workflow_dispatch:
 jobs:
-  trigger:
-    if: github.event_name == 'schedule' || github.event.pull_request.merged
+  TagBot:
+    # THIS 'if' LINE IS NEW
+    if: github.event_name == 'workflow_dispatch' || github.actor == 'JuliaTagBot'
+    # NOTHING BELOW HAS CHANGED
     runs-on: ubuntu-latest
     steps:
-      - run: julia --project=.ci -e 'using Pkg; Pkg.instantiate(); Pkg.add("RegistryCI")'
-      - run: julia --project=.ci -e 'using RegistryCI.TagBot; TagBot.main()'
-        env:
-          GITHUB_TOKEN: ${{ secrets.TAGBOT_TOKEN }}
+      - uses: JuliaRegistries/TagBot@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
